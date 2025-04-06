@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import axiosClient from "../../../axios-client.js";
-import Sidebar from "../Sidebar";
-import TopHeader from "../TopHeader";
+import Sidebar from "../Sidebar.js";
+import TopHeader from "../TopHeader.js";
 import { useNavigate } from "react-router-dom";
 
 const EmployeeManagement = () => {
@@ -31,7 +30,6 @@ const EmployeeManagement = () => {
     const fetchEmployees = async () => {
       try {
         const response = await axiosClient.get("/employees");
-
         setEmployees(response.data.data);
       } catch (error) {
         console.error("Erreur de chargement des employés:", error);
@@ -170,7 +168,6 @@ const EmployeeManagement = () => {
                   className="btn btn-primary btn-sm"
                   onClick={() => {
                     resetEmployeeForm();
-                    // openModal('employeeModal');
                     setShowModal(true);
                   }}
                 >
@@ -180,7 +177,7 @@ const EmployeeManagement = () => {
 
               <div className="card-body">
                 <div className="table-responsive">
-                  <table className="table table-striped table-hover">
+                  <table className="table table-striped table-hover table-sm">
                     <thead className="table-light">
                       <tr>
                         <th>Matricule</th>
@@ -240,7 +237,7 @@ const EmployeeManagement = () => {
 
       {/* Modal */}
       <div className={`modal ${showModal ? "d-block" : ""}`} tabIndex="-1">
-        <div className="modal-dialog">
+        <div className="modal-dialog modal-lg">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">
@@ -306,9 +303,9 @@ const EmployeeManagement = () => {
                     }
                     required
                   >
-                    {roleOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
+                    {roleOptions.map((role) => (
+                      <option key={role.value} value={role.value}>
+                        {role.label}
                       </option>
                     ))}
                   </select>
@@ -321,7 +318,7 @@ const EmployeeManagement = () => {
                 className="btn btn-secondary"
                 onClick={() => setShowModal(false)}
               >
-                Annuler
+                Fermer
               </button>
               <button
                 type="button"
@@ -329,21 +326,9 @@ const EmployeeManagement = () => {
                 onClick={
                   selectedEmployee ? handleUpdateEmployee : handleAddEmployee
                 }
-                disabled={!validateEmployeeForm() || loading}
+                disabled={loading}
               >
-                {loading ? (
-                  <>
-                    <span
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                    ></span>
-                    {selectedEmployee ? "Mise à jour..." : "Ajout..."}
-                  </>
-                ) : selectedEmployee ? (
-                  "Mettre à jour"
-                ) : (
-                  "Ajouter"
-                )}
+                {loading ? "Chargement..." : selectedEmployee ? "Mettre à jour" : "Ajouter"}
               </button>
             </div>
           </div>

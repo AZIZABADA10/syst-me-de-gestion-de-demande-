@@ -33,27 +33,12 @@ const Sidebar = () => {
     }
   };
   const menuItems = [
-    { 
-      icon: <LayoutDashboard />, 
-      label: 'Tableau de Bord', 
-      path: '/dashboard' 
-    },
-    { 
-      icon: <Users />, 
-      label: 'Employés', 
-      path: '/EmployeeManagement' 
-    },
-    { 
-      icon: <FileText />, 
-      label: 'Demandes', 
-      path: '/demandes' 
-    },
-    { 
-      icon: <Package />, 
-      label: 'Stock', 
-      path: '/stock' 
-    }
+    { icon: <LayoutDashboard />, label: 'Tableau de Bord', path: '/dashboard-administaratif' },
+    { icon: <Users />, label: 'Employés', path: '/EmployeeManagement-administaratif' },
+    { icon: <FileText />, label: 'Demandes', path: '/demandes-administaratif' },
+    { icon: <Package />, label: 'Stock', path: '/stock-administaratif' }
   ];
+  
 
   return (
     <div className="bg-white border-end h-100" style={{ 

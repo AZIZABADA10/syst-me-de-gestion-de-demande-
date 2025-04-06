@@ -1,19 +1,34 @@
 import React from 'react';
-import { LayoutDashboard, ClipboardList } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { LayoutDashboard, ClipboardList, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import axiosClient from '../../axios-client';
 
 const Sidebar = () => {
-  const menuItems = [
-    { 
-      icon: <LayoutDashboard />, 
-      label: 'Tableau de Bord', 
-      path: '/dashboard' 
-    },
-    { 
-      icon: <ClipboardList />, 
-      label: 'Nouvelle Demande', 
-      path: '/nouvelle-demande' 
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await axiosClient.post('/logout');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.clear();
+      document.cookie.split(';').forEach(cookie => {
+        document.cookie = cookie.replace(/^ +/, '')
+          .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
+      });
+      navigate('/login');
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate('/login');
+      } else {
+        console.error('Logout error:', error);
+      }
     }
+  };
+
+  const menuItems = [
+    { icon: <LayoutDashboard />, label: 'Tableau de Bord', path: '/dashboard-employe' },
+    { icon: <ClipboardList />, label: 'Nouvelle Demande', path: '/nouvelle-demande-employe' }
   ];
 
   return (
@@ -35,7 +50,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Navigation avec espacement */}
+      {/* Navigation */}
       <nav className="nav flex-column px-3" style={{ paddingTop: '1rem' }}>
         {menuItems.map((item) => (
           <Link 
@@ -63,6 +78,22 @@ const Sidebar = () => {
           </Link>
         ))}
       </nav>
+
+      {/* Bouton de déconnexion */}
+      <div className="mt-auto p-3">
+        <button
+          onClick={handleLogout}
+          className="nav-link d-flex align-items-center py-2 px-3 rounded-2 w-100 text-start border-0 bg-transparent text-danger"
+          style={{
+            minHeight: '45px',
+            transition: 'all 0.3s ease',
+            cursor: 'pointer'
+          }}
+        >
+          <LogOut className="me-3 text-danger" size={21} strokeWidth={2} />
+          <span className="fw-medium">Déconnexion</span>
+        </button>
+      </div>
 
       <style jsx>{`
         .nav-link {

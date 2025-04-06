@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import PropTypes from "prop-types";
 import Sidebar from "../Sidebar";
@@ -19,7 +17,7 @@ const useDemandes = () => {
     try {
       const response = await axiosClient.get('/demandes');
       console.log(response.data.data);
-      
+
       setState(prev => ({
         ...prev,
         demandes: response.data.data,
@@ -39,7 +37,7 @@ const useDemandes = () => {
 
   const updateDemandeStatus = useCallback(async (id, status) => {
     const originalDemandes = state.demandes;
-    
+
     // Optimistic update
     setState(prev => ({
       ...prev,
@@ -76,12 +74,8 @@ const TableRow = memo(({ demande, onAccept, onReject, onDetails }) => (
     <td>{demande.id}</td>
     <td>{demande.material}</td>
     <td>{demande.quantity}</td>
-    <td>
-      {new Date(demande.created_at).toLocaleDateString()}
-    </td>
-    <td>
-      <Badge>{demande.status}</Badge>
-    </td>
+    <td>{new Date(demande.created_at).toLocaleDateString()}</td>
+    <td><Badge>{demande.status}</Badge></td>
     <td>
       {demande.status === 'pending' ? (
         <>
@@ -174,21 +168,20 @@ const Demandes = () => {
   return (
     <div className="container-fluid p-0">
       <div className="row g-0">
-        <div className={`col-lg-2 col-md-3 ${
-          sidebarOpen ? "d-block" : "d-none d-md-block"
-        }`}>
+        {/* Sidebar */}
+        <div className={`col-lg-2 col-md-3 ${sidebarOpen ? "d-block" : "d-none d-md-block"}`}>
           <Sidebar />
         </div>
 
         <div className={`col-lg-10 col-md-9 ${sidebarOpen ? "d-none" : ""}`}>
           <TopHeader onMenuClick={toggleSidebar} />
-          
+
           <div className="container-fluid p-3 p-md-4">
             <div className="card shadow-sm">
               <div className="card-header bg-white">
                 <h5 className="card-title mb-0">Gestion des Demandes</h5>
               </div>
-              
+
               <div className="card-body">
                 {error && (
                   <div className="alert alert-danger" role="alert">

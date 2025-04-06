@@ -1,19 +1,34 @@
 import React from 'react';
-import { LayoutDashboard, ClipboardList } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { LayoutDashboard, ClipboardList, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import axiosClient from '../../axios-client';
 
 const Sidebar = () => {
-  const menuItems = [
-    {
-      icon: <LayoutDashboard />,
-      label: 'Tableau de Bord',
-      path: '/dashboard'
-    },
-    {
-      icon: <ClipboardList />,
-      label: 'Les nouvelles Demandes',
-      path: '/nouvelle-demande'
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await axiosClient.post('/logout');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.clear();
+      document.cookie.split(';').forEach(cookie => {
+        document.cookie = cookie.replace(/^ +/, '')
+          .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
+      });
+      navigate('/login');
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate('/login');
+      } else {
+        console.error('Logout error:', error);
+      }
     }
+  };
+
+  const menuItems = [
+    { icon: <LayoutDashboard />, label: 'Tableau de Bord', path: '/dashboard-validateur' },
+    { icon: <ClipboardList />, label: 'Les nouvelles Demandes', path: '/nouvelle-demande-validateur' }
   ];
 
   return (
@@ -21,7 +36,7 @@ const Sidebar = () => {
       minHeight: '100vh',
       boxShadow: '4px 0 15px rgba(0, 0, 0, 0.03)'
     }}>
-      {/* En-tête avec padding augmenté */}
+      {/* En-tête */}
       <div className="text-center pt-4 pb-3 px-3 mb-4">
         <div className="position-relative">
           <h2 className="mb-3 fs-5 fw-semibold text-primary">
@@ -35,7 +50,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Navigation avec espacement et styles interactifs */}
+      {/* Navigation */}
       <nav className="nav flex-column px-3" style={{ paddingTop: '1rem' }}>
         {menuItems.map((item) => (
           <Link
@@ -64,12 +79,28 @@ const Sidebar = () => {
         ))}
       </nav>
 
+      {/* Déconnexion */}
+      <div className="mt-auto p-3">
+        <button
+          onClick={handleLogout}
+          className="nav-link d-flex align-items-center py-2 px-3 rounded-2 w-100 text-start border-0 bg-transparent text-danger"
+          style={{
+            minHeight: '45px',
+            transition: 'all 0.3s ease',
+            cursor: 'pointer'
+          }}
+        >
+          <LogOut className="me-3 text-danger" size={21} strokeWidth={2} />
+          <span className="fw-medium">Déconnexion</span>
+        </button>
+      </div>
+
       <style jsx>{`
         .nav-link {
           position: relative;
           overflow: hidden;
         }
-        
+
         .nav-link::before {
           content: '';
           position: absolute;
@@ -80,19 +111,19 @@ const Sidebar = () => {
           background-color: rgba(13, 110, 253, 0.1);
           transition: width 0.3s ease;
         }
-        
+
         .nav-link:hover::before {
           width: 100%;
         }
-        
+
         .nav-link.active {
           background: rgba(13, 110, 253, 0.05) !important;
         }
-        
+
         .nav-link:active {
           transform: scale(0.97);
         }
-        
+
         .separator-line {
           transition: all 0.3s ease;
         }

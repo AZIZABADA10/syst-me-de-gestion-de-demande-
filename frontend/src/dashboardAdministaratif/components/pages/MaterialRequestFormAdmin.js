@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import apiService from "../../services/apiService";
+import apiService from "../../services/apiService"; // Assurez-vous que apiService est bien configuré pour utiliser axios
 import Sidebar from "../Sidebar";
 import TopHeader from "../TopHeader";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +21,7 @@ const MaterialRequestForm = () => {
     setError(null);
 
     try {
-      await apiService.submitMaterialRequest(formData);
+      await apiService.submitMaterialRequest(formData); // Assurez-vous que la méthode d'API est correcte
       alert("Demande soumise avec succès");
       navigate("/suivi-demandes");
     } catch (err) {
@@ -41,9 +41,7 @@ const MaterialRequestForm = () => {
       <div className="row g-0">
         {/* Sidebar - visible sur PC, cachée sur mobile */}
         <div
-          className={`col-lg-2 col-md-3 ${
-            sidebarOpen ? "d-block" : "d-none d-md-block"
-          }`}
+          className={`col-lg-2 col-md-3 ${sidebarOpen ? "d-block" : "d-none d-md-block"}`}
         >
           <Sidebar />
         </div>
@@ -55,9 +53,7 @@ const MaterialRequestForm = () => {
           <div className="container-fluid p-3 p-md-4">
             <div className="card shadow-sm">
               <div className="card-header bg-white">
-                <h5 className="card-title mb-0">
-                  Nouvelle Demande de Matériel
-                </h5>
+                <h5 className="card-title mb-0">Nouvelle Demande de Matériel</h5>
               </div>
               <div className="card-body">
                 {error && (

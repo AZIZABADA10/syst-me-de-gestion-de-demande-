@@ -145,7 +145,7 @@ const TopHeader = ({ onMenuClick }) => {
 
         {/* Dropdown Utilisateur */}
         <div className="dropdown">
-          <a
+          <a 
             href="#"
             className="dropdown-toggle d-flex align-items-center text-decoration-none"
             data-bs-toggle="dropdown"
