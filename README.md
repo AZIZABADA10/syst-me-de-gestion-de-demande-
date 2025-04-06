@@ -1,108 +1,116 @@
-# Laravel + React.js (Vite) Starter
+Système de Gestion des Demandes de Matériel
 
-Ce projet est une application Laravel avec React.js en frontend, utilisant **Vite** pour un développement rapide.
+## Description
+Le projet **Système de Gestion des Demandes de Matériel** est un projet de stage réalisé au sein de l'organisation Group Bc skills.
+Ce système permet la gestion efficace des demandes de matériel, incluant la gestion des stocks, des utilisateurs, ainsi que des demandes soumises par les employés.
 
-## 🛠️ Installation et Configuration
+## Fonctionnalités principales
+1. **Gestion des demandes** :
+   - Affichage des demandes passées.
+   - Approvisionnement et suivi des demandes.
+   - Validation ou rejet des demandes.
 
-### 1️⃣ Cloner le projet
-```sh
-git clone https://github.com/ton-utilisateur/ton-projet.git
-cd ton-projet
-```
+2. **Gestion des stocks** :
+   - Visualisation des niveaux de stock.
+   - Mise à jour des stocks en temps réel.
+   - Alerte pour les stocks faibles.
 
-### 2️⃣ Installer les dépendances Laravel
-```sh
-composer install
-```
+3. **Gestion des utilisateurs** :
+   - Création, modification et suppression des utilisateurs.
+   - Attribution de rôles spécifiques (admin, validateur, employé).
 
-### 3️⃣ Configurer l'environnement Laravel
-Copie le fichier `.env.example` en `.env` :
-```sh
-cp .env.example .env
-```
-Générer la clé de l'application :
-```sh
-php artisan key:generate
-```
-Configurer la base de données dans `.env` :
-```
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=nom_de_ta_bdd
-DB_USERNAME=utilisateur
-DB_PASSWORD=mot_de_passe
-```
-Puis migrer les tables :
-```sh
-php artisan migrate
-```
+4. **Sécurité et configuration** :
+   - Authentification des utilisateurs.
+   - Notifications et alertes pour les utilisateurs.
 
-### 4️⃣ Installer les dépendances React.js
-```sh
-cd react
-npm install
-```
+## Architecture
+- **Backend** : [Laravel](https://laravel.com/) (API) avec MySQL
+- **Frontend** : [React.js](https://reactjs.org/) avec Bootstrap
+- **Base de données** : MySQL
 
-## 🚀 Démarrer l'application
+## Technologies utilisées
+- **Laravel** pour le backend (API RESTful).
+- **React.js** pour le frontend avec des composants dynamiques.
+- **MySQL** pour la gestion de la base de données.
+- **Bootstrap** pour une interface moderne et responsive.
 
-### Lancer le backend Laravel
-```sh
-php artisan serve
-```
+## Installation
 
-### Lancer le frontend React avec Vite
-```sh
-cd react
-npm run dev
-```
+### Prérequis
+- PHP 8.0 ou supérieur
+- Composer pour gérer les dépendances PHP
+- Node.js et npm (ou yarn) pour la gestion des dépendances frontend
+- MySQL
 
-## 🔧 Configuration CORS
-Si tu utilises Laravel Sanctum pour l'authentification, active CORS :
-```sh
-composer require fruitcake/laravel-cors
-```
-Ajoute ceci dans `config/cors.php` :
-```php
-'paths' => ['api/*', 'sanctum/csrf-cookie'],
-```
+### Backend (Laravel)
+1. Clonez le dépôt :
+   ```bash
+   git clone https://github.com/AZIZABADA10/syst-me-de-gestion-de-demande-.git
+   ```
+2. Accédez au dossier backend :
+   ```bash
+   cd syst-me-de-gestion-de-demande-/backend
+   ```
+3. Installez les dépendances avec Composer :
+   ```bash
+   composer install
+   ```
+4. Copiez le fichier `.env.example` en `.env` et configurez vos variables d'environnement (notamment les informations de la base de données).
+5. Générez la clé d'application Laravel :
+   ```bash
+   php artisan key:generate
+   ```
+6. Exécutez les migrations pour créer les tables de la base de données :
+   ```bash
+   php artisan migrate
+   ```
+7. Lancez le serveur local :
+   ```bash
+   php artisan serve
+   ```
 
-## 📂 Structure du projet
-```
-📦 projet
-├── 📂 backend (Laravel)
-│   ├── app/
-│   ├── bootstrap/
-│   ├── config/
-│   ├── database/
-│   ├── routes/
-│   ├── .env
-│   └── artisan
-│
-├── 📂 react (Frontend Vite + React)
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   ├── vite.config.js
-│   ├── package.json
-│   └── .env
-```
+### Frontend (React.js)
+1. Accédez au dossier frontend :
+   ```bash
+   cd frontend
+   ```
+2. Installez les dépendances avec npm (ou yarn) :
+   ```bash
+   npm install
+   ```
+3. Lancez le serveur de développement :
+   ```bash
+   npm start
+   ```
 
-## 📌 Notes
-- Laravel est utilisé pour le backend en tant qu'API.
-- React.js avec Vite permet un développement rapide et fluide.
-- Laravel Sanctum est recommandé pour l'authentification.
-- N'oublie pas d'activer CORS pour éviter les erreurs de requêtes cross-origin.
+## Structure du projet
 
----
+### Backend
+- **app/** : Contient les contrôleurs, modèles et autres composants de l'application.
+- **routes/** : Définition des routes API.
+- **database/** : Contient les migrations et les usines.
 
-### 🔗 Liens utiles
-- [Laravel Documentation](https://laravel.com/docs)
-- [Vite Documentation](https://vitejs.dev/)
-- [React.js Documentation](https://react.dev/)
+### Frontend
+- **src/** : Composants React.
+  - **components/** : Composants utilisés dans les dashboards (Admin, Validateur, Employé).
+  - **pages/** : Pages des différents dashboards.
+  - **App.js** : Point d'entrée de l'application React.
 
-Bon développement ! 🚀
+## Contribuer
+Les contributions sont les bienvenues ! Si vous souhaitez contribuer à ce projet, veuillez suivre les étapes suivantes :
 
+1. Forkez ce dépôt.
+2. Créez une nouvelle branche (`git checkout -b feature/ma-fonctionnalite`).
+3. Commitez vos modifications (`git commit -am 'Ajout d'une nouvelle fonctionnalité'`).
+4. Poussez votre branche (`git push origin feature/ma-fonctionnalite`).
+5. Ouvrez une pull request.
 
+## Auteurs
+- Aziz Abada – Développeur principal
+- Jajaa Mohemad – Développeur principal
+
+## Licence
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## Remerciements
+Merci à l'organisation Group Bc skills pour l'opportunité de stage et à nos encadrants pour leur soutien.
