@@ -1,4 +1,4 @@
-name: Build
+name: Analyse SonarQube locale
 
 on:
   push:
@@ -6,32 +6,26 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build and analyze
-    runs-on: windows-latest
-    
+  sonarqube:
+    runs-on: self-hosted
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Checkout du code
+        uses: actions/checkout@v4
 
-      # Cache SonarQube scanner (optionnel)
-      - name: Cache SonarQube scanner
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar-${{ hashFiles('**/sonar-project.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-sonar-
+      - name: Démarrer SonarQube (Docker Compose)
+        run: docker-compose up -d
 
-      # Lancer l'analyse SonarQube
-      - uses: SonarSource/sonarqube-scan-action@v4
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          
-      # Vérification du Quality Gate (optionnel)
-      - uses: SonarSource/sonarqube-quality-gate-action@v1
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Attendre que SonarQube démarre
+        run: |
+          echo "Attente de 30s pour SonarQube..."
+          sleep 30
+
+      - name: Installer SonarScanner
+        run: |
+          curl -o sonar-scanner.zip -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-windows.zip
+          unzip sonar-scanner.zip -d sonar-scanner
+          echo "$(pwd)/sonar-scanner/sonar-scanner-5.0.1.3006-windows/bin" >> $GITHUB_PATH
+
+      - name: Exécuter l’analyse SonarQube
+        run: sonar-scanner
