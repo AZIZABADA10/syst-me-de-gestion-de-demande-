@@ -1,0 +1,45 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sonarqube-scan:
+    name: SonarQube Scan
+    runs-on: ubuntu-latest
+    env:
+      SONAR_PROJECT_KEY: "gestion_mat-riel"
+      SONAR_SOURCES: "."
+      SONAR_JAVA_BINARIES: "**/target/classes"  # À adapter si projet Java
+      SONAR_EXCLUSIONS: "**/vendor/**,**/node_modules/**,**/tests/**"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Obligatoire pour l'analyse SonarQube
+
+      - name: Set up JDK (requis pour SonarScanner)
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install SonarScanner
+        uses: SonarSource/sonarqube-scan-action@v1.8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}          # Token SonarQube (à définir dans GitHub Secrets)
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}    # URL SonarQube (ex: http://localhost:9000)
+
+      - name: Run SonarQube Analysis
+        run: |
+          C:\Users\pc\Desktop\Github Actions\actions-runner\bin\sonar-scanner.bat 
+            -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+            -Dsonar.sources=$SONAR_SOURCES \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.token=$SONAR_TOKEN \
+            -Dsonar.exclusions=$SONAR_EXCLUSIONS \
+            -Dsonar.qualitygate.wait=true  # Bloque le workflow si le Quality Gate échoue
