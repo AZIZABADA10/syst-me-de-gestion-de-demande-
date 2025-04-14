@@ -173,7 +173,7 @@ const Dashboard = () => {
             {/* Tableau des demandes */}
             <div className="card shadow-sm">
               <div className="card-header bg-white d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-                <h5 className="card-title mb-2 mb-md-0">Suivi des Demandes</h5>
+                <h5 className="card-title mb-2 mb-md-0">Suivi Tout les Demandes</h5>
                 <div className="btn-group" role="group">
                   {["all", "Approuvé", "En attente", "Rejeté"].map((status) => (
                     <button
