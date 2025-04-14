@@ -11,7 +11,7 @@ jobs:
     name: SonarQube Scan
     runs-on: ubuntu-latest
     env:
-      SONAR_PROJECT_KEY: "gestion_mat-riel"
+      SONAR_PROJECT_KEY: "gestion_materiel"
       SONAR_SOURCES: "."
       SONAR_JAVA_BINARIES: "**/target/classes"  # À adapter si projet Java
       SONAR_EXCLUSIONS: "**/vendor/**,**/node_modules/**,**/tests/**"
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Obligatoire pour l'analyse SonarQube
+          fetch-depth: 0  # Obligatoire pour SonarQube
 
       - name: Set up JDK (requis pour SonarScanner)
         uses: actions/setup-java@v3
@@ -28,18 +28,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install SonarScanner
-        uses: SonarSource/sonarqube-scan-action@v1.8
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}          # Token SonarQube (à définir dans GitHub Secrets)
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}    # URL SonarQube (ex: http://localhost:9000)
+      - name: Cache SonarQube packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       - name: Run SonarQube Analysis
-        run: |
-          C:\Users\pc\Desktop\Github Actions\actions-runner\bin\sonar-scanner.bat 
-            -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-            -Dsonar.sources=$SONAR_SOURCES \
-            -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.token=$SONAR_TOKEN \
-            -Dsonar.exclusions=$SONAR_EXCLUSIONS \
-            -Dsonar.qualitygate.wait=true  # Bloque le workflow si le Quality Gate échoue
+        uses: SonarSource/sonarqube-scan-action@v1.8
+        with:
+          args: >
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=${{ env.SONAR_SOURCES }}
+            -Dsonar.exclusions=${{ env.SONAR_EXCLUSIONS }}
+            -Dsonar.java.binaries=${{ env.SONAR_JAVA_BINARIES }}
+            -Dsonar.qualitygate.wait=true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
