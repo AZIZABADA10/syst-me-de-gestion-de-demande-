@@ -16,8 +16,6 @@ const useDemandes = () => {
   const fetchDemandes = useCallback(async (signal) => {
     try {
       const response = await axiosClient.get('/demandes');
-      console.log(response.data.data);
-
       setState(prev => ({
         ...prev,
         demandes: response.data.data,
@@ -35,22 +33,20 @@ const useDemandes = () => {
     }
   }, []);
 
-  const updateDemandeStatus = useCallback(async (id, status) => {
+  const updateDemandeStatus = useCallback(async (id, status ,extraData = {}) => {
     const originalDemandes = state.demandes;
 
-    // Optimistic update
     setState(prev => ({
       ...prev,
       demandes: prev.demandes.map(d => 
-        d.id === id ? {...d, status} : d
+        d.id === id ? {...d, status, ...extraData} : d
       )
     }));
 
     try {
-      await axiosClient.put(`/demandes/${id}`, {status});
+      await axiosClient.put(`/demandes/${id}`, { status, ...extraData });
       return true;
     } catch (err) {
-      // Rollback on error
       setState(prev => ({
         ...prev,
         demandes: originalDemandes,
@@ -69,68 +65,90 @@ const useDemandes = () => {
   };
 };
 
-const TableRow = memo(({ demande, onAccept, onReject, onDetails }) => (
+const TableRow = memo(({ demande, onOpenModal }) => (
   <tr>
-    <td>{demande.id}</td>
-    <td>{demande.material}</td>
-    <td>{demande.quantity}</td>
-    <td>{new Date(demande.created_at).toLocaleDateString()}</td>
-    <td><Badge>{demande.status}</Badge></td>
-    <td>
-      {demande.status === 'pending' ? (
-        <>
-          <button
-            className="btn btn-sm btn-outline-success me-2"
-            onClick={() => onAccept(demande.id)}
-            aria-label={`Accepter la demande ${demande.id}`}
-          >
-            Accepter
-          </button>
-          <button
-            className="btn btn-sm btn-outline-danger me-2"
-            onClick={() => onReject(demande.id)}
-            aria-label={`Refuser la demande ${demande.id}`}
-          >
-            Refuser
-          </button>
-        </>
-      ) : demande.status === 'accepted' ? (
-        <button
-          className="btn btn-sm btn-outline-danger me-2"
-          onClick={() => onReject(demande.id)}
-          aria-label={`Refuser la demande ${demande.id}`}
-        >
-          Refuser
-        </button>
-      ) : demande.status === 'rejected' ? (
+  <td>{demande.id}</td>
+  <td>{demande.material}</td>
+  <td>{demande.quantity}</td>
+  <td>{new Date(demande.created_at).toLocaleDateString()}</td>
+  <td>
+    <Badge bg={
+      demande.status === 'accepted' ? 'success' :
+      demande.status === 'rejected' ? 'danger' :
+      'secondary'
+    }>
+      {
+        demande.status === 'accepted' ? 'Approuvée' :
+        demande.status === 'rejected' ? 'Rejetée' :
+        'En attente'
+      }
+    </Badge>
+  </td>
+  <td>
+    {demande.status === 'accepted' && demande.delivery_date ? (
+      new Date(demande.delivery_date).toLocaleDateString()
+    ) : (
+      "-"
+    )}
+  </td>
+  <td>
+    {demande.status === 'rejected' && demande.rejection_reason ? (
+      demande.rejection_reason
+    ) : (
+      "-"
+    )}
+  </td>
+  <td>
+    {demande.status === 'pending' ? (
+      <>
         <button
           className="btn btn-sm btn-outline-success me-2"
-          onClick={() => onAccept(demande.id)}
-          aria-label={`Accepter la demande ${demande.id}`}
+          onClick={() => onOpenModal(demande.id, 'accept')}
         >
-          Accepter
+          Approuver
         </button>
-      ) : null}
-    </td>
-  </tr>
+        <button
+          className="btn btn-sm btn-outline-danger"
+          onClick={() => onOpenModal(demande.id, 'reject')}
+        >
+          Rejeter
+        </button>
+      </>
+    ) : (
+      <span className="text-muted">Action effectuée</span>
+    )}
+  </td>
+</tr>
+
 ));
 
 TableRow.propTypes = {
   demande: PropTypes.shape({
     id: PropTypes.number.isRequired,
-    material_name: PropTypes.string.isRequired,
+    material: PropTypes.string.isRequired,
     quantity: PropTypes.number.isRequired,
-    created_at: PropTypes.string.isRequired
+    created_at: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired
   }).isRequired,
-  onAccept: PropTypes.func.isRequired,
-  onReject: PropTypes.func.isRequired,
-  onDetails: PropTypes.func.isRequired
+  onOpenModal: PropTypes.func.isRequired
 };
 
 const Demandes = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { demandes, loading, error, fetchDemandes, updateDemandeStatus } = useDemandes();
+  const {
+    demandes,
+    loading,
+    error,
+    fetchDemandes,
+    updateDemandeStatus
+  } = useDemandes();
+
+  const [selectedDemandeId, setSelectedDemandeId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState(null); // 'accept' or 'reject'
+  const [justification, setJustification] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -138,37 +156,33 @@ const Demandes = () => {
     return () => controller.abort();
   }, [fetchDemandes]);
 
-  const handleAccept = useCallback(async (id) => {
-    if (window.confirm("Confirmer l'acceptation de cette demande ?")) {
-      await updateDemandeStatus(id, "accepted");
+  const handleOpenModal = (id, mode) => {
+    setSelectedDemandeId(id);
+    setModalMode(mode);
+    setShowModal(true);
+  };
+
+  const handleSubmitModal = async () => {
+    if (modalMode === 'accept') {
+      await updateDemandeStatus(selectedDemandeId, "accepted", {
+        delivery_date: deliveryDate
+      });
+    } else {
+      await updateDemandeStatus(selectedDemandeId, "rejected", {
+        rejection_reason: justification
+      });
     }
-  }, [updateDemandeStatus]);
+    setShowModal(false);
+    setDeliveryDate('');
+    setJustification('');
+  };
 
-  const handleReject = useCallback(async (id) => {
-    if (window.confirm("Confirmer le refus de cette demande ?")) {
-      await updateDemandeStatus(id, "rejected");
-    }
-  }, [updateDemandeStatus]);
-
-  const handleDetails = useCallback(
-    (id) => navigate(`/demandes/${id}`),
-    [navigate]
-  );
-
-  const toggleSidebar = useCallback(
-    () => setSidebarOpen(prev => !prev),
-    []
-  );
-
-  const memoizedDemandes = useMemo(
-    () => demandes,
-    [demandes]
-  );
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+  const memoizedDemandes = useMemo(() => demandes, [demandes]);
 
   return (
     <div className="container-fluid p-0">
       <div className="row g-0">
-        {/* Sidebar */}
         <div className={`col-lg-2 col-md-3 ${sidebarOpen ? "d-block" : "d-none d-md-block"}`}>
           <Sidebar />
         </div>
@@ -183,11 +197,7 @@ const Demandes = () => {
               </div>
 
               <div className="card-body">
-                {error && (
-                  <div className="alert alert-danger" role="alert">
-                    {error}
-                  </div>
-                )}
+                {error && <div className="alert alert-danger">{error}</div>}
 
                 {loading ? (
                   <div className="text-center">
@@ -198,23 +208,25 @@ const Demandes = () => {
                 ) : (
                   <div className="table-responsive">
                     <table className="table table-hover">
-                      <thead>
+                    <thead>
                         <tr>
-                          {["ID", "Matériel", "Quantité", "Date", "Actions"].map(
-                            (header) => (
-                              <th key={header}>{header}</th>
-                            )
-                          )}
+                          <th>ID</th>
+                          <th>Matériel</th>
+                          <th>Quantité</th>
+                          <th>Date</th>
+                          <th>Statut</th>
+                          <th>Date de Livraison</th>
+                          <th>Motif de Rejet</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
+
                       <tbody>
                         {memoizedDemandes.map((demande) => (
                           <TableRow
                             key={demande.id}
                             demande={demande}
-                            onAccept={handleAccept}
-                            onReject={handleReject}
-                            onDetails={handleDetails}
+                            onOpenModal={handleOpenModal}
                           />
                         ))}
                       </tbody>
@@ -226,6 +238,52 @@ const Demandes = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="modal show fade d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {modalMode === 'accept' ? 'Approuver la demande' : 'Rejeter la demande'}
+                </h5>
+                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                {modalMode === 'accept' ? (
+                  <>
+                    <label className="form-label">Date de livraison</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={deliveryDate}
+                      onChange={(e) => setDeliveryDate(e.target.value)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <label className="form-label">Justification du refus</label>
+                    <textarea
+                      className="form-control"
+                      value={justification}
+                      onChange={(e) => setJustification(e.target.value)}
+                    ></textarea>
+                  </>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  Annuler
+                </button>
+                <button type="button" className="btn btn-primary" onClick={handleSubmitModal}>
+                  Confirmer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

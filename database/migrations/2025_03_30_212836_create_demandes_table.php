@@ -15,12 +15,14 @@ return new class extends Migration
     {
         Schema::create('demandes', function (Blueprint $table) {
             $table->id();
-            $table->string("material");
-            $table->integer("quantity");
-            $table->enum('status', ['pending', 'accepted', 'rejected']);
-            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
+            $table->string('nom_materiel');
+            $table->integer('quantite');
+            $table->text('justification');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
             $table->timestamps();
         });
+        
     }
 
     /**

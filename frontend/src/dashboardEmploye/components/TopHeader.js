@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Bell, User, Settings, LogOut, CheckCircle, XCircle, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import apiService from "./services/apiService";
-import axios from "axios"; // Import Axios
 import axiosClient from "../../axios-client";
 
 const TopHeader = ({ onMenuClick }) => {
@@ -14,36 +13,34 @@ const TopHeader = ({ onMenuClick }) => {
   const notifRef = useRef(null);
 
   useEffect(() => {
-    // Récupération de l'utilisateur depuis localStorage (si déjà stocké)
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
       setUser(storedUser);
     }
 
-    // Récupération des notifications de demandes de matériel
     const fetchNotifications = async () => {
       try {
-        const requests = await apiService.getMaterialRequests();
-        const updatedRequests = requests.filter(req => req.status === "Approuvé" || req.status === "Rejeté");
-        setNotifications(updatedRequests);
+        const requests = await apiService.getUserRequests();
+        const newNotifications = Array.isArray(requests)
+          ? requests.filter((req) => req.status === "Approuvé" || req.status === "Rejeté")
+          : [];
+        setNotifications(newNotifications);
       } catch (error) {
         console.error("Erreur lors de la récupération des notifications:", error);
       }
     };
 
-    fetchNotifications();
-
-    // Récupération du nom de l'utilisateur via API Laravel
     const fetchUserData = async () => {
       try {
         const response = await axiosClient.get("/user");
-        setUser(response.data); // Assurez-vous que l'API retourne { name: "John Doe" }
-        localStorage.setItem("user", JSON.stringify(response.data)); // Stocker l'utilisateur localement
+        setUser(response.data);
+        localStorage.setItem("user", JSON.stringify(response.data));
       } catch (error) {
         console.error("Erreur lors de la récupération des informations utilisateur :", error);
       }
     };
 
+    fetchNotifications();
     fetchUserData();
   }, []);
 
@@ -67,12 +64,11 @@ const TopHeader = ({ onMenuClick }) => {
 
   return (
     <header className="bg-white border-bottom py-2 py-md-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
-      {/* Bouton menu pour mobile */}
+      {/* Bouton menu mobile */}
       <button className="btn btn-light d-md-none me-2 p-2 border-0" onClick={onMenuClick}>
         <Menu size={24} className="text-muted" />
       </button>
 
-      {/* ✅ Affichage dynamique du nom de l'utilisateur */}
       <h4 className="fw-bold mb-0">Bonjour, {user ? user.name : "Employé"}</h4>
 
       <div className="d-flex align-items-center">
@@ -87,7 +83,6 @@ const TopHeader = ({ onMenuClick }) => {
             )}
           </button>
 
-          {/* Menu déroulant des notifications */}
           {showNotifications && (
             <div className="position-absolute top-100 end-0 bg-white shadow-sm p-3 rounded" style={{ width: "300px", maxWidth: "90vw", zIndex: 1000 }}>
               <h6 className="fw-bold">Notifications</h6>
@@ -97,7 +92,11 @@ const TopHeader = ({ onMenuClick }) => {
                 ) : (
                   notifications.map((notif) => (
                     <li key={notif.id} className="d-flex align-items-center mb-2">
-                      {notif.status === "Approuvé" ? <CheckCircle size={18} className="text-success me-2" /> : <XCircle size={18} className="text-danger me-2" />}
+                      {notif.status === "Approuvé" ? (
+                        <CheckCircle size={18} className="text-success me-2" />
+                      ) : (
+                        <XCircle size={18} className="text-danger me-2" />
+                      )}
                       <span className="text-truncate">{notif.material_name} - {notif.status}</span>
                     </li>
                   ))

@@ -12,12 +12,14 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const fetchRequests = async () => {
+    const fetchEmployeeRequests = async () => {
       try {
-        const data = await apiService.getMaterialRequests();
+        // Récupérer les demandes spécifiques à l'employé connecté
+        const data = await apiService.getEmployeeRequests();
         setRequests(data);
         setLoading(false);
 
+        // Calculer les statistiques
         const stats = data.reduce((acc, request) => {
           acc.total++;
           switch (request.status) {
@@ -36,7 +38,7 @@ const Dashboard = () => {
       }
     };
 
-    fetchRequests();
+    fetchEmployeeRequests();
   }, []);
 
   const getStatusColor = (status) => {
@@ -57,17 +59,14 @@ const Dashboard = () => {
   return (
     <div className="container-fluid p-0">
       <div className="row g-0">
-        {/* Sidebar - visible sur PC, cachée sur mobile */}
         <div className={`col-lg-2 col-md-3 ${sidebarOpen ? 'd-block' : 'd-none d-md-block'}`}>
           <Sidebar />
         </div>
         
-        {/* Contenu principal */}
         <div className={`col-lg-10 col-md-9 ${sidebarOpen ? 'd-none' : ''}`}>
           <TopHeader onMenuClick={toggleSidebar} />
           
-          <div className="container-fluid p-3 p-md-4">            
-            {/* Cartes statistiques */}
+          <div className="container-fluid p-3 p-md-4">
             <div className="row mb-4 g-3">
               {[ 
                 { icon: <ClipboardList size={24} />, title: "Total", value: requestStats.total, color: "primary" },
@@ -89,7 +88,6 @@ const Dashboard = () => {
               ))}
             </div>
 
-            {/* Tableau des demandes */}
             <div className="card shadow-sm">
               <div className="card-header bg-white d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                 <h5 className="card-title mb-2 mb-md-0">Historique Des Demandes</h5>

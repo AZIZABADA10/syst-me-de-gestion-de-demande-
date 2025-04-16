@@ -95,7 +95,7 @@ const Sidebar = () => {
         </button>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .nav-link {
           position: relative;
           overflow: hidden;

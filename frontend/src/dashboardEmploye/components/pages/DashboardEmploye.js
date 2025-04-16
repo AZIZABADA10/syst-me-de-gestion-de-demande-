@@ -14,7 +14,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const data = await apiService.getMaterialRequests();
+        const response = await apiService.getMaterialRequests();
+        const data = response.data?.data || [];
+
         setRequests(data);
         setLoading(false);
 
@@ -57,17 +59,14 @@ const Dashboard = () => {
   return (
     <div className="container-fluid p-0">
       <div className="row g-0">
-        {/* Sidebar - visible sur PC, cachée sur mobile */}
         <div className={`col-lg-2 col-md-3 ${sidebarOpen ? 'd-block' : 'd-none d-md-block'}`}>
           <Sidebar />
         </div>
         
-        {/* Contenu principal */}
         <div className={`col-lg-10 col-md-9 ${sidebarOpen ? 'd-none' : ''}`}>
           <TopHeader onMenuClick={toggleSidebar} />
           
-          <div className="container-fluid p-3 p-md-4">
-            {/* Cartes statistiques */}
+          <div className="container-fluid p-3 p-md-4">            
             <div className="row mb-4 g-3">
               {[ 
                 { icon: <ClipboardList size={24} />, title: "Total", value: requestStats.total, color: "primary" },
@@ -89,10 +88,9 @@ const Dashboard = () => {
               ))}
             </div>
 
-            {/* Tableau des demandes */}
             <div className="card shadow-sm">
               <div className="card-header bg-white d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-                <h5 className="card-title mb-2 mb-md-0">Suivi Mes Demandes</h5>
+                <h5 className="card-title mb-2 mb-md-0">Historique Des Demandes</h5>
                 <div className="btn-group" role="group">
                   {['all', 'Approuvé', 'En attente', 'Rejeté'].map((status) => (
                     <button 

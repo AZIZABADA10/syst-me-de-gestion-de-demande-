@@ -13,10 +13,16 @@ class Demande extends Model
      *
      * @var array<int, string>
      */
+    // app/Models/Demande.php
     protected $fillable = [
-        'material', 
-        'quantity',
-        'status'
+        'nom_materiel',
+        'quantite',
+        'justification',
+        'user_id',
+        'status',
+        'delivery_date',
+        'rejection_reason'
     ];
+
 
 }

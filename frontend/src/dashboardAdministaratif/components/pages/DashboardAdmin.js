@@ -104,7 +104,7 @@ const Dashboard = () => {
           <Sidebar />
         </div>
 
-        <div className={`col-lg-10 col-md-9`}>
+        <div className="col-lg-10 col-md-9">
           <TopHeader onMenuClick={toggleSidebar} />
 
           <div className="container-fluid p-3 p-md-4">
@@ -173,7 +173,7 @@ const Dashboard = () => {
             {/* Tableau des demandes */}
             <div className="card shadow-sm">
               <div className="card-header bg-white d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-                <h5 className="card-title mb-2 mb-md-0">Suivi Tout les Demandes</h5>
+                <h5 className="card-title mb-2 mb-md-0">Suivi Toutes les Demandes</h5>
                 <div className="btn-group" role="group">
                   {["all", "Approuvé", "En attente", "Rejeté"].map((status) => (
                     <button
@@ -215,9 +215,7 @@ const Dashboard = () => {
                         {filteredRequests.map((request) => (
                           <tr key={request.id}>
                             <td>
-                              {new Date(
-                                request.created_at
-                              ).toLocaleDateString()}
+                              {new Date(request.created_at).toLocaleDateString()}
                             </td>
                             <td>{request.material_name}</td>
                             <td>{request.quantity}</td>
@@ -235,13 +233,15 @@ const Dashboard = () => {
                             </td>
                           </tr>
                         ))}
+                        {filteredRequests.length === 0 && (
+                          <tr>
+                            <td colSpan="5" className="text-center">
+                              Aucune demande trouvée.
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
-                    {filteredRequests.length === 0 && (
-                      <div className="text-center text-muted py-4">
-                        Aucune demande trouvée
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
