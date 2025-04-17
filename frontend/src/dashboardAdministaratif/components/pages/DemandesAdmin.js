@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import axiosClient from "../../../axios-client";
 import { Badge } from "react-bootstrap";
 
+// Hook personnalisé pour gérer les demandes
 const useDemandes = () => {
   const [state, setState] = useState({
     demandes: [],
@@ -33,13 +34,13 @@ const useDemandes = () => {
     }
   }, []);
 
-  const updateDemandeStatus = useCallback(async (id, status ,extraData = {}) => {
+  const updateDemandeStatus = useCallback(async (id, status, extraData = {}) => {
     const originalDemandes = state.demandes;
 
     setState(prev => ({
       ...prev,
-      demandes: prev.demandes.map(d => 
-        d.id === id ? {...d, status, ...extraData} : d
+      demandes: prev.demandes.map(d =>
+        d.id === id ? { ...d, status, ...extraData } : d
       )
     }));
 
@@ -65,61 +66,65 @@ const useDemandes = () => {
   };
 };
 
+// Ligne du tableau
 const TableRow = memo(({ demande, onOpenModal }) => (
   <tr>
-  <td>{demande.id}</td>
-  <td>{demande.material}</td>
-  <td>{demande.quantity}</td>
-  <td>{new Date(demande.created_at).toLocaleDateString()}</td>
-  <td>
-    <Badge bg={
-      demande.status === 'accepted' ? 'success' :
-      demande.status === 'rejected' ? 'danger' :
-      'secondary'
-    }>
-      {
-        demande.status === 'accepted' ? 'Approuvée' :
-        demande.status === 'rejected' ? 'Rejetée' :
-        'En attente'
-      }
-    </Badge>
-  </td>
-  <td>
-    {demande.status === 'accepted' && demande.delivery_date ? (
-      new Date(demande.delivery_date).toLocaleDateString()
-    ) : (
-      "-"
-    )}
-  </td>
-  <td>
-    {demande.status === 'rejected' && demande.rejection_reason ? (
-      demande.rejection_reason
-    ) : (
-      "-"
-    )}
-  </td>
-  <td>
-    {demande.status === 'pending' ? (
-      <>
-        <button
-          className="btn btn-sm btn-outline-success me-2"
-          onClick={() => onOpenModal(demande.id, 'accept')}
-        >
-          Approuver
-        </button>
-        <button
-          className="btn btn-sm btn-outline-danger"
-          onClick={() => onOpenModal(demande.id, 'reject')}
-        >
-          Rejeter
-        </button>
-      </>
-    ) : (
-      <span className="text-muted">Action effectuée</span>
-    )}
-  </td>
-</tr>
-
+    <td>{demande.id}</td>
+    <td>{demande.user?.name || '-'}</td>
+    <td>{demande.material}</td>
+    <td>{demande.quantity}</td>
+    <td>{new Date(demande.created_at).toLocaleDateString()}</td>
+    <td>
+      <Badge bg={
+        demande.status === 'accepted' ? 'success' :
+        demande.status === 'rejected' ? 'danger' :
+        'secondary'
+      }>
+        {
+          demande.status === 'accepted' ? 'Approuvée' :
+          demande.status === 'rejected' ? 'Rejetée' :
+          'En attente'
+        }
+      </Badge>
+    </td>
+    <td>
+      {demande.status === 'accepted' && demande.delivery_date ? (
+        new Date(demande.delivery_date).toLocaleDateString()
+      ) : (
+        "-"
+      )}
+    </td>
+    <td>
+      {demande.status === 'rejected' && demande.rejection_reason ? (
+        demande.rejection_reason
+      ) : (
+        "-"
+      )}
+    </td>
+    <td>
+      {demande.justification || "-"}
+    </td>
+    <td>
+      {demande.status === 'pending' ? (
+        <>
+          <button
+            className="btn btn-sm btn-outline-success me-2"
+            onClick={() => onOpenModal(demande.id, 'accept')}
+          >
+            Approuver
+          </button>
+          <button
+            className="btn btn-sm btn-outline-danger"
+            onClick={() => onOpenModal(demande.id, 'reject')}
+          >
+            Rejeter
+          </button>
+        </>
+      ) : (
+        <span className="text-muted">Action effectuée</span>
+      )}
+    </td>
+  </tr>
 ));
 
 TableRow.propTypes = {
@@ -128,11 +133,18 @@ TableRow.propTypes = {
     material: PropTypes.string.isRequired,
     quantity: PropTypes.number.isRequired,
     created_at: PropTypes.string.isRequired,
-    status: PropTypes.string.isRequired
+    status: PropTypes.string.isRequired,
+    justification: PropTypes.string,
+    rejection_reason: PropTypes.string,
+    delivery_date: PropTypes.string,
+    user: PropTypes.shape({
+      name: PropTypes.string
+    })
   }).isRequired,
   onOpenModal: PropTypes.func.isRequired
 };
 
+// Composant principal
 const Demandes = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -146,7 +158,7 @@ const Demandes = () => {
 
   const [selectedDemandeId, setSelectedDemandeId] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState(null); // 'accept' or 'reject'
+  const [modalMode, setModalMode] = useState(null); // 'accept' ou 'reject'
   const [justification, setJustification] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
 
@@ -208,15 +220,17 @@ const Demandes = () => {
                 ) : (
                   <div className="table-responsive">
                     <table className="table table-hover">
-                    <thead>
+                      <thead>
                         <tr>
                           <th>ID</th>
+                          <th>Demandeur</th>
                           <th>Matériel</th>
                           <th>Quantité</th>
                           <th>Date</th>
                           <th>Statut</th>
                           <th>Date de Livraison</th>
                           <th>Motif de Rejet</th>
+                          <th>Justification</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
