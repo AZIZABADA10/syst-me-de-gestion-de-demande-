@@ -11,6 +11,8 @@ import {
   Archive,
 } from "lucide-react";
 
+const STATUS_LIST = ["all", "Approuvé", "En attente", "Rejeté"];
+
 const Dashboard = () => {
   const [requestStats, setRequestStats] = useState({
     total: 0,
@@ -18,6 +20,7 @@ const Dashboard = () => {
     pending: 0,
     rejected: 0,
   });
+
   const [requests, setRequests] = useState([]);
   const [stats, setStats] = useState({
     employees: 0,
@@ -25,6 +28,7 @@ const Dashboard = () => {
     totalStock: 0,
     stockDetails: [],
   });
+
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -175,7 +179,7 @@ const Dashboard = () => {
               <div className="card-header bg-white d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                 <h5 className="card-title mb-2 mb-md-0">Suivi Toutes les Demandes</h5>
                 <div className="btn-group" role="group">
-                  {["all", "Approuvé", "En attente", "Rejeté"].map((status) => (
+                  {STATUS_LIST.map((status) => (
                     <button
                       key={status}
                       className={`btn btn-sm ${
@@ -193,7 +197,11 @@ const Dashboard = () => {
               <div className="card-body">
                 {loading ? (
                   <div className="text-center py-4">
-                    <div className="spinner-border text-primary" role="status">
+                    <div
+                      className="spinner-border text-primary"
+                      role="status"
+                      aria-label="Chargement en cours"
+                    >
                       <span className="visually-hidden">Chargement...</span>
                     </div>
                   </div>
@@ -202,40 +210,49 @@ const Dashboard = () => {
                     <table className="table table-striped table-hover">
                       <thead>
                         <tr>
-                          <th>Date</th>
+                          <th>ID</th>
+                          <th>Demandeur</th>
                           <th>Matériel</th>
                           <th>Quantité</th>
-                          <th className="d-none d-md-table-cell">
-                            Justification
-                          </th>
+                          <th>Date</th>
                           <th>Statut</th>
+                          <th>Date de Livraison</th>
+                          <th>Motif de Rejet</th>
+                          <th className="d-none d-md-table-cell">Justification</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredRequests.map((request) => (
-                          <tr key={request.id}>
-                            <td>
-                              {new Date(request.created_at).toLocaleDateString()}
-                            </td>
-                            <td>{request.material_name}</td>
-                            <td>{request.quantity}</td>
-                            <td className="d-none d-md-table-cell">
-                              {request.justification}
-                            </td>
-                            <td>
-                              <span
-                                className={`badge bg-${getStatusColor(
-                                  request.status
-                                )}`}
-                              >
-                                {request.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                        {filteredRequests.length === 0 && (
+                        {filteredRequests.length > 0 ? (
+                          filteredRequests.map((request) => (
+                            <tr key={request.id}>
+                              <td>{request.id}</td>
+                              <td>{request.requester_name || "-"}</td>
+                              <td>{request.material_name || "-"}</td>
+                              <td>{request.quantity || "-"}</td>
+                              <td>
+                                {request.created_at
+                                  ? new Date(request.created_at).toLocaleDateString()
+                                  : "-"}
+                              </td>
+                              <td>
+                                <span className={`badge bg-${getStatusColor(request.status)}`}>
+                                  {request.status || "Inconnu"}
+                                </span>
+                              </td>
+                              <td>
+                                {request.delivery_date
+                                  ? new Date(request.delivery_date).toLocaleDateString()
+                                  : "-"}
+                              </td>
+                              <td>{request.rejection_reason || "-"}</td>
+                              <td className="d-none d-md-table-cell">
+                                {request.justification || "-"}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
                           <tr>
-                            <td colSpan="5" className="text-center">
+                            <td colSpan="9" className="text-center">
                               Aucune demande trouvée.
                             </td>
                           </tr>
